@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MPI Ide Pokok – Teks Lisan dan Multimodal</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+:root{--p:#d81b60;--pl:#fde4ee;--pb:#fff4f8;--b:#7fb7e6;--bl:#e3f1fc;--t:#3b1f2b;--ok:#2e9d62;--no:#d64545}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%}
+body{font-family:Nunito,system-ui,sans-serif;color:var(--t);background:linear-gradient(135deg,var(--pb),var(--bl));font-size:clamp(15px,2.2vw,18px);line-height:1.55}
+.scr{display:none;min-height:100vh;padding:16px;align-items:center;justify-content:center;flex-direction:column}
+.scr.on{display:flex}
+.card{width:100%;max-width:780px;background:rgba(255,255,255,.82);backdrop-filter:blur(10px);border:1px solid #fff;border-radius:26px;padding:clamp(16px,3vw,30px);box-shadow:0 10px 36px rgba(216,27,96,.15)}
+h1,h2,h3{margin:.3em 0;color:var(--p)}h1{font-size:clamp(24px,5vw,38px)}h2{font-size:clamp(20px,3.6vw,28px)}
+.btn,button{font:inherit;font-weight:800;border:0;border-radius:999px;padding:10px 22px;background:var(--p);color:#fff;cursor:pointer;margin:4px}
+button.alt{background:var(--b);color:#143a5a}button:disabled{opacity:.4;cursor:not-allowed}
+.badge{display:inline-block;background:var(--bl);color:#1d5a8c;border-radius:999px;padding:3px 14px;font-weight:800;margin:3px;font-size:.85em}
+.c{text-align:center}.pulse{animation:pu 1.4s infinite}@keyframes pu{50%{transform:scale(1.07)}}
+.bar{transform-box:fill-box;transform-origin:center;animation:bw 1s ease-in-out infinite}@keyframes bw{50%{transform:scaleY(.35)}}
+.box{border-radius:16px;padding:10px 14px;margin:8px 0}.loc{background:var(--bl)}.kbc{background:var(--pl)}
+.ay{background:#fff;border:2px dashed var(--p);border-radius:16px;padding:10px;text-align:center;margin:8px 0}
+.ar{font-family:Amiri,'Traditional Arabic',serif;font-size:1.7em;direction:rtl;line-height:1.9}.ay p{margin:2px}
+.stim{background:#fff;border-left:6px solid var(--b);border-radius:12px;padding:10px 14px;margin:8px 0;font-style:italic}
+.q{font-weight:800}.opt{display:block;width:100%;text-align:left;background:#fff;color:var(--t);border:2px solid var(--pl);margin:6px 0;border-radius:14px}
+.opt.sel{border-color:var(--p);background:var(--pl)}.opt.ok{border-color:var(--ok);background:#dff5e8}.opt.no{border-color:var(--no);background:#fde3e3}
+.fb{margin:8px 0;font-weight:700}.fb.good{color:var(--ok)}.fb.bad{color:var(--no)}.lock{pointer-events:none}
+.zs{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.zone{background:var(--bl);border-radius:14px;padding:8px}.slot{min-height:46px;border:2px dashed var(--b);border-radius:10px;margin-top:4px;padding:3px}
+.pool{min-height:54px;margin:10px 0;padding:6px;border-radius:14px;background:var(--pl);display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:#fff;border:2px solid var(--p);border-radius:12px;padding:6px 10px;cursor:grab;user-select:none;font-size:.92em}.chip.sel{background:var(--p);color:#fff}
+.nav{display:flex;justify-content:space-between;flex-wrap:wrap;margin-top:12px}
+.menus{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.mc{background:#fff;border-radius:20px;padding:16px;text-align:center;cursor:pointer;border:3px solid var(--pl)}.mc.lk{opacity:.55}
+.mc .ic{font-size:2.4em}.lv{display:inline-block;border-radius:8px;padding:1px 10px;color:#fff;font-weight:800;font-size:.8em}
+.l1{background:#2e9d62}.l2{background:#e39a12}.l3{background:#d64545}
+#mod{position:fixed;inset:0;background:rgba(60,20,40,.4);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9}
+#mod[hidden]{display:none}#mod .card{max-height:90vh;overflow:auto;text-align:center}
+.av{width:110px;height:110px;border-radius:50%;border:4px solid var(--p);object-fit:cover;margin:auto;display:flex;align-items:center;justify-content:center;background:var(--pl);color:var(--p);font-size:2em;font-weight:800}
+input{font:inherit;width:100%;padding:10px 14px;border-radius:14px;border:2px solid var(--pl);margin:4px 0}.err{color:var(--no);font-weight:700;min-height:1.3em;font-size:.9em}
+table{width:100%;border-collapse:collapse}td,th{border:1px solid #e8b9cb;padding:5px 8px;text-align:left}
+#sb{position:fixed;top:8px;right:8px;z-index:8;padding:6px 12px;margin:0}
+.tick{overflow:hidden;border-radius:999px;background:linear-gradient(90deg,var(--pl),var(--bl));margin:8px 0 12px;padding:6px 0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+.tk{display:flex;width:max-content;animation:tkm 42s linear infinite;will-change:transform}.tick:hover .tk{animation-play-state:paused}@keyframes tkm{to{transform:translateX(-50%)}}
+.ti{display:inline-flex;align-items:center;gap:8px;background:#fff;border-radius:999px;padding:3px 16px 3px 4px;margin:0 8px;font-weight:800;color:var(--p);white-space:nowrap;box-shadow:0 2px 8px rgba(216,27,96,.15)}
+.ti i{font-style:normal;width:32px;height:32px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:1.1em}
+.pic{border-radius:18px;overflow:hidden;margin:6px 0;border:3px solid #fff;box-shadow:0 4px 14px rgba(216,27,96,.15)}.pic svg{display:block;width:100%;height:auto;max-height:190px}
+svg *{transform-box:fill-box;transform-origin:center}
+.sun{animation:sn 4s ease-in-out infinite}@keyframes sn{50%{transform:scale(1.15);opacity:.85}}
+.drift{animation:dr 7s ease-in-out infinite alternate}@keyframes dr{to{transform:translateX(24px)}}
+.rain{animation:rn 1s linear infinite}@keyframes rn{from{transform:translateY(-4px);opacity:0}50%{opacity:1}to{transform:translateY(8px);opacity:0}}
+.wave{animation:wv 3s ease-in-out infinite alternate}@keyframes wv{to{transform:translateX(10px)}}
+.wy{animation:wy 2.5s ease-in-out infinite alternate}@keyframes wy{to{transform:translateY(3px)}}
+.swim{animation:sw 6s ease-in-out infinite alternate}@keyframes sw{to{transform:translateX(40px)}}.swim.b{animation-duration:7s;animation-direction:alternate-reverse}
+.jump{animation:jp 2.4s ease-in-out infinite}@keyframes jp{50%{transform:translateY(-16px) rotate(-20deg)}}
+.bob{animation:bb 3s ease-in-out infinite}@keyframes bb{50%{transform:translateY(-4px) rotate(2deg)}}
+.sway{animation:sy 3.5s ease-in-out infinite}@keyframes sy{50%{transform:scale(1.07) rotate(3deg)}}
+.crab{animation:cr 4s ease-in-out infinite alternate}@keyframes cr{to{transform:translateX(24px)}}
+.rice{animation:ri 2.2s ease-in-out infinite alternate;transform-origin:bottom center}@keyframes ri{to{transform:skewX(8deg)}}
+.peck{animation:pk 2.6s ease-in-out infinite;transform-origin:bottom center}@keyframes pk{40%{transform:rotate(5deg) translateY(2px)}}
+.egg{animation:eg 1.6s ease-in-out infinite}@keyframes eg{25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+.float{animation:fl 3s ease-in-out infinite}@keyframes fl{50%{transform:translateY(-6px)}}
+.tw{animation:tw 1.8s ease-in-out infinite}@keyframes tw{50%{transform:scale(1.35) rotate(20deg)}}
+.grow{animation:gr 2.8s ease-in-out infinite;transform-origin:bottom center}@keyframes gr{50%{transform:scaleY(1.12)}}
+.pop{animation:po 1.6s ease-in-out infinite}@keyframes po{50%{transform:scale(1.18)}}
+.scan{animation:sc 3.4s ease-in-out infinite alternate}@keyframes sc{to{transform:translate(46px,6px)}}
+.bub{animation:bu 2.4s ease-in-out infinite}.bub.b{animation-delay:1.2s}@keyframes bu{50%{transform:scale(1.05)}}
+.wv{animation:wa 1.4s ease-in-out infinite}@keyframes wa{50%{opacity:.25}}
+.dots circle{animation:dt 1.2s ease-in-out infinite}.dots circle:nth-child(2){animation-delay:.2s}.dots circle:nth-child(3){animation-delay:.4s}@keyframes dt{50%{transform:translateY(-4px);opacity:.4}}
+
+/* Teka-teki silang interaktif */
+.cross-wrap{overflow-x:auto;margin:12px 0;padding:8px;background:#fff8fb;border-radius:16px}
+.cross-grid{display:grid;gap:3px;width:max-content;margin:0 auto}
+.cross-cell{width:clamp(25px,5.3vw,38px);height:clamp(25px,5.3vw,38px);position:relative}
+.cross-cell.block{background:transparent}
+.cross-cell input{width:100%;height:100%;margin:0;padding:0;text-align:center;text-transform:uppercase;font-weight:900;font-size:clamp(14px,3vw,19px);border:2px solid #e8b9cb;border-radius:5px;background:#fff;color:#3b1f2b}
+.cross-cell input:focus{outline:3px solid #f6b3cb;background:#fff4f8}
+.cross-cell input.good{background:#dff5e8;border-color:#2e9d62}
+.cross-cell input.bad{background:#fde3e3;border-color:#d64545}
+.cross-num{position:absolute;top:0;left:2px;font-size:9px;font-weight:900;line-height:1;color:#d81b60;pointer-events:none}
+.cross-clues{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.cross-clues section{background:#fff;border:1px solid #f3c6d7;border-radius:14px;padding:10px}
+.cross-clues h3{margin-top:0}
+.cross-clues label{display:block;margin:8px 0;font-size:.94em}
+.cross-clues input{padding:6px 8px;margin-top:3px;text-transform:uppercase}
+
+@media print{.scr:not(#report){display:none!important}.noprint{display:none!important}body{background:#fff}.card{box-shadow:none;backdrop-filter:none}}
+@keyframes cm{from{transform:translateX(-90px)}to{transform:translateX(300px)}}
+.cl{animation:cm 24s linear infinite}.cl.b{animation-duration:34s;animation-delay:-14s}
+.bd{animation:bf 9s linear infinite}@keyframes bf{0%{transform:translate(-30px,0)}25%{transform:translate(55px,-8px)}50%{transform:translate(140px,4px)}75%{transform:translate(215px,-6px)}100%{transform:translate(280px,0)}}
+.sail{animation:sl 9s ease-in-out infinite alternate}@keyframes sl{to{transform:translateX(70px)}}
+.noanim *{animation:none!important}
+#ab{position:fixed;top:8px;right:116px;z-index:8;padding:6px 12px;margin:0}
+#mb{position:fixed;top:8px;right:62px;z-index:8;padding:6px 12px;margin:0}
+@media(prefers-reduced-motion:reduce){.tk,.sun,.drift,.rain,.wave,.wy,.swim,.jump,.bob,.sway,.crab,.rice,.peck,.egg,.float,.tw,.grow,.pop,.scan,.bub,.wv,.dots circle{animation-duration:0.01ms!important;animation-iteration-count:1!important}}
+
+</style></head><body>
+
+<div id="splash" class="scr on c"><svg width="120" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#fde4ee" stroke="#d81b60" stroke-width="4"/><g fill="#d81b60"><rect class="bar" x="26" y="38" width="8" height="24" rx="4"/><rect class="bar" x="40" y="26" width="8" height="48" rx="4" style="animation-delay:.2s"/><rect class="bar" x="54" y="34" width="8" height="32" rx="4" style="animation-delay:.4s"/><rect class="bar" x="68" y="42" width="8" height="16" rx="4" style="animation-delay:.6s"/></g></svg><h1>Ide Pokok</h1><p>Teks Lisan dan Multimodal</p></div>
+
+<div id="cover" class="scr"><div class="card c">
+<span class="badge">Bahasa Inggris</span><span class="badge">Kelas IV · Fase B · MI</span>
+<h1>Ide Pokok – Teks Lisan dan Multimodal</h1>
+<svg viewBox="0 0 320 190" style="width:min(100%,360px)" aria-label="Ilustrasi gelembung percakapan dengan gelombang suara">
+<rect x="14" y="14" width="200" height="104" rx="24" fill="#fff" stroke="#d81b60" stroke-width="4"/><path d="M64 118 L54 160 L104 118Z" fill="#fff" stroke="#d81b60" stroke-width="4"/><rect x="60" y="112" width="48" height="10" fill="#fff"/>
+<g fill="#d81b60"><rect class="bar" x="36" y="50" width="10" height="36" rx="5"/><rect class="bar" x="56" y="38" width="10" height="60" rx="5" style="animation-delay:.15s"/><rect class="bar" x="76" y="46" width="10" height="44" rx="5" style="animation-delay:.3s"/><rect class="bar" x="96" y="54" width="10" height="28" rx="5" style="animation-delay:.45s"/></g>
+<rect x="124" y="46" width="70" height="8" rx="4" fill="#f6b3cb"/><rect x="124" y="64" width="54" height="8" rx="4" fill="#f6b3cb"/><rect x="124" y="82" width="64" height="8" rx="4" fill="#f6b3cb"/>
+<rect x="170" y="100" width="136" height="70" rx="20" fill="#cfe6fa" stroke="#7fb7e6" stroke-width="4"/>
+<text x="238" y="130" text-anchor="middle" font-size="15" font-weight="800" fill="#1d5a8c">★ main idea</text><text x="238" y="152" text-anchor="middle" font-size="12" fill="#1d5a8c">+ supporting details</text></svg>
+<div><button class="alt" onclick="dev()">Informasi Pengembang</button><button class="alt" onclick="goal()">Tujuan Pembelajaran</button><button class="pulse" onclick="go('form')">MULAI</button></div></div></div>
+
+<div id="form" class="scr"><div class="card"><h2>Siapa namamu?</h2>
+<label>Nama lengkap</label><input id="fn" autocomplete="off"><div class="err" id="e1"></div>
+<label>Kelas</label><input id="fk" autocomplete="off" placeholder="contoh: IV"><div class="err" id="e2"></div>
+<button onclick="sub()">Lanjut</button><button class="alt" onclick="go('cover')">Kembali</button></div></div>
+
+<div id="intro" class="scr"><div class="card"><div class="tick" aria-hidden="true"><div class="tk"></div></div><div id="gb"></div><div class="nav"><button class="alt" id="gp">Kembali</button><button id="gn">Selanjutnya (Next)</button></div></div></div>
+
+<div id="menu" class="scr"><div class="card"><div class="tick" aria-hidden="true"><div class="tk"></div></div><div id="mh" class="c"></div><div class="menus" id="mm"></div></div></div>
+<div id="learn" class="scr"><div class="card"><div class="tick" aria-hidden="true"><div class="tk"></div></div><div id="lb"></div></div></div>
+<div id="play" class="scr"><div class="card"><div class="tick" aria-hidden="true"><div class="tk"></div></div><div id="pb"></div></div></div>
+<div id="practice" class="scr"><div class="card"><div class="tick" aria-hidden="true"><div class="tk"></div></div><div id="tb"></div></div></div>
+<div id="report" class="scr"><div class="card"><div class="tick noprint" aria-hidden="true"><div class="tk"></div></div><div id="rp"></div><div class="c noprint"><button onclick="pdf()">Unduh / Cetak Laporan PDF</button><button class="alt" onclick="menu()">Kembali ke Menu</button></div></div></div>
+<button id="ab" class="noprint alt" onclick="ta()" aria-label="Animasi">✨</button>
+<button id="mb" class="noprint alt" onclick="musicToggle()" aria-label="Musik latar">🎵 Musik</button>
+<button id="sb" class="noprint alt" onclick="tg()" aria-label="Suara">🔊</button>
+<div id="mod" hidden><div class="card" id="modc"></div></div>
+
+<script>
+// ==========================================
+// KONFIGURASI GOOGLE APPS SCRIPT
+// Ganti URL di bawah ini dengan URL Web App Anda
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwicXUFy7Oh8VWjv6y8vAzzLv6lBLcHL29sMgbjbY6_38N_TJ3ezAcxwB0T06JPmqg3/exec";
+// ==========================================
+
+const $=s=>document.querySelector(s),sh=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
+const S={n:'',k:'',ld:[],learn:0,play:0,pok:0,test:[]};
+
+// --- FUNGSI INTEGRASI GAS ---
+function sendDataToGAS(payload) {
+  if (GAS_URL === "URL_GAS_ANDA_DISINI") return;
+  fetch(GAS_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload)
+  }).catch(e => console.log("Gagal mengirim data:", e));
+}
+
+function syncDataSoal() {
+  if (GAS_URL === "URL_GAS_ANDA_DISINI") return;
+  let soalList = [];
+  PL.forEach((q, i) => soalList.push({menu: "Bermain", no: i+1, tipe: q.t, pertanyaan: q.q, kunci: key(q)}));
+  CW.forEach((q, i) => soalList.push({menu: "TTS", no: i+1, tipe: "Silang", pertanyaan: q.clue, kunci: q.w}));
+  TS.forEach((q, i) => soalList.push({menu: "Berlatih", no: i+1, tipe: q.t, pertanyaan: q.q, kunci: key(q)}));
+  sendDataToGAS({ type: "soal", soalList: soalList });
+}
+// -----------------------------
+
+function go(id){const before=document.querySelector('.scr.on')?.id;document.querySelectorAll('.scr').forEach(e=>e.classList.toggle('on',e.id==id));scrollTo(0,0);if(before&&before!==id)snd(520,.12,'triangle',.07)}
+function mod(h,x){$('#modc').innerHTML=h+'<br><button onclick="cm()">'+(x||'Tutup')+'</button>';$('#mod').hidden=false}
+function cm(){$('#mod').hidden=true}
+setTimeout(()=>go('cover'),1900);
+const AY=[{ar:'وَقُلْ رَبِّ زِدْنِي عِلْمًا',ref:'QS. Thaha [20]: 114',id:'Dan katakanlah (Muhammad), “Ya Tuhanku, tambahkanlah ilmu kepadaku.”'},
+{ar:'وَقُولُوا لِلنَّاسِ حُسْنًا',ref:'QS. Al-Baqarah [2]: 83',id:'…dan bertutur katalah yang baik kepada manusia.'}];
+const ay=k=>`<div class="ay"><div class="ar">${AY[k].ar}</div><small>${AY[k].ref}</small><p>${AY[k].id}</p><small>Terjemahan Kemenag RI</small></div>`;
+function dev(){mod(`<img class="av" src="https://iili.io/nvQhMRR.md.jpg" alt="Foto guru dan pengembang media pembelajaran" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'av',textContent:'MS'}))"><p><b>Guru / Pengembang Media Pembelajaran</b></p><h2>Mardawati, S.S</h2><p>MIS Al-Khairaat Paguat</p><p>mardawati_2001@madrasah.kemenag.go.id</p>`,'Kembali ke Cover')}
+function goal(){mod(`<h2>Tujuan Pembelajaran</h2><p>Murid dapat menganalisis hasil dari ide pokok yang terdapat di teks lisan dengan memiliki kesadaran dalam berkomunikasi secara efektif dan sopan, sebagai wujud cinta terhadap ilmu.</p>${ay(0)}<div class="box kbc">💗 Cintai dirimu dengan belajar, dan cintai sesama dengan bertutur kata yang baik.</div>`,'Kembali ke Cover')}
+
+function sub(){
+  const n=$('#fn').value.trim(),k=$('#fk').value.trim();
+  $('#e1').textContent=n?'':'Tulis namamu dulu ya.';$('#e2').textContent=k?'':'Tulis kelasmu dulu ya.';
+  if(n&&k){
+    S.n=n; S.k=k; gi=0; go('intro'); rg();
+    syncDataSoal(); // Sinkronisasi soal ke GAS saat pengguna login
+  }
+}
+
+let gi=0;
+const G=()=>[`<h2>Selamat Datang, ${S.n}!</h2><p>Kamu akan belajar menemukan <b>ide pokok</b> dari teks lisan dan multimodal, dengan contoh dari Paguat, Pohuwato.</p>`,
+`<h2>Cara Belajar</h2><p>Baca setiap slide materi, lalu selesaikan tantangan di bagian bawah. Slide selesai setelah jawabanmu benar.</p>`,
+`<h2>Cara Menjawab</h2><p>Pilih jawaban dengan sentuhan. Untuk menyusun atau menjodohkan: <b>seret</b> kartu dengan mouse, atau <b>ketuk kartu lalu ketuk kotaknya</b> di layar sentuh.</p>`,
+`<h2>Menu Terkunci Bertahap</h2><p>Belajar 🔓 → Bermain 🔒 → Berlatih 🔒. Selesaikan satu tahap untuk membuka tahap berikutnya.</p>`];
+function rg(){const g=G();$('#gb').innerHTML=g[gi];$('#gp').disabled=!gi;const l=gi==g.length-1;$('#gn').textContent=l?'Masuk ke Menu Utama':'Selanjutnya (Next)';$('#gp').onclick=()=>{gi--;rg()};$('#gn').onclick=()=>{if(l)menu();else{gi++;rg()}}}
+function menu(){if(window.speechSynthesis)speechSynthesis.cancel();go('menu');$('#mh').innerHTML=`<h2>👤 ${S.n} · Kelas ${S.k}</h2><p>Pilih menu belajarmu</p>`;
+const m=[['📖','Belajar',1,'Pelajari 7 slide materi.'],['🎮','Bermain',S.learn,'Selesaikan semua slide Belajar dulu.'],['✏️','Berlatih',S.play,'Selesaikan menu Bermain dulu.'],['📚','Referensi',1,'']];
+$('#mm').innerHTML=m.map((x,i)=>`<div class="mc ${x[2]?'':'lk'}" data-i="${i}"><div class="ic">${x[2]?x[0]:'🔒'}</div><h3>${x[1]} ${x[2]?'🔓':'🔒'}</h3></div>`).join('');
+document.querySelectorAll('.mc').forEach(e=>e.onclick=()=>{const i=+e.dataset.i;if(!m[i][2])mod(`<h2>Menu masih terkunci 🔒</h2><p>${m[i][3]} Semangat, kamu pasti bisa!</p>`);else[startLearn,startPlay,startTest,refs][i]()})}
+function refs(){mod(`<h2>📚 Referensi</h2><ol style="text-align:left"><li>Buku Bahasa Inggris, Penerbit Erlangga.</li><li>Buku mata pelajaran dari Kemendikbud.</li><li>Aset gambar dan kode HTML dibuat secara otomatis oleh AI.</li></ol>`,'Kembali ke Menu')}
+let AC,mute=false,bgmOn=false,bgmTimer=null,bgmStep=0;
+function musicToggle(){if(bgmOn){bgmOn=false;clearTimeout(bgmTimer);bgmTimer=null;$('#mb').textContent='🎵 Musik';return}bgmOn=true;$('#mb').textContent='🎵 Musik: ON';if(!mute)playBgm()}
+function playBgm(){if(!bgmOn||mute)return;const notes=[523.25,659.25,783.99,659.25,587.33,698.46,880,698.46];snd(notes[bgmStep%notes.length],.28,'sine',.025);bgmStep++;bgmTimer=setTimeout(playBgm,420)}
+function snd(f,d,t,v){if(mute)return;f=f||660;d=d||.09;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state=='suspended')AC.resume();const n=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();o.type=t||'sine';o.frequency.setValueAtTime(f,n);o.frequency.exponentialRampToValueAtTime(f*1.5,n+d);g.gain.setValueAtTime(v||.15,n);g.gain.exponentialRampToValueAtTime(.001,n+d);o.connect(g);g.connect(AC.destination);o.start(n);o.stop(n+d)}catch(e){}}
+document.addEventListener('click',e=>{if(e.target.closest('button,.chip,.mc,.opt'))snd()},true);
+function ta(){document.body.classList.toggle('noanim');$('#ab').textContent=document.body.classList.contains('noanim')?'⏸️':'✨'}
+function tg(){mute=!mute;$('#sb').textContent=mute?'🔇':'🔊';if(mute){if(bgmTimer)clearTimeout(bgmTimer);bgmTimer=null}else if(bgmOn)playBgm()}
+const TK=[['📘','Mata Pelajaran: Bahasa Inggris'],['🎓','Kelas IV · Fase B · MI'],['👩‍🏫','Pengembang: Mardawati, S.S · MIS Al-Khairaat Paguat'],['🎯','Tujuan: menganalisis ide pokok dalam teks lisan dan multimodal'],['🔊','Listen carefully, find the main idea!'],['🌾','Petani Paguat menjaga air sungai'],['🐦','Burung maleo di Cagar Alam Panua'],['🗣️','Berkomunikasi efektif dan sopan'],['⭐','Ide pokok + detail pendukung'],['💗','Cintai ilmu, cintai sesama'],['🌊','Jaga sungai tetap bersih']];
+function tick(){const h=TK.map(([e,t])=>`<span class="ti"><i>${e}</i>${t}</span>`).join('');const z='<div style="display:flex">'+h+'</div><div style="display:flex">'+h+'</div>';document.querySelectorAll('.tk').forEach(t=>{t.innerHTML=z})}tick();
+function speak(i,b){if(!('speechSynthesis' in window)){b.textContent='Suara tidak didukung';return}const ss=speechSynthesis;if(ss.speaking){ss.cancel();document.querySelectorAll('.sp').forEach(x=>x.textContent='🔊 Dengarkan');return}const u=new SpeechSynthesisUtterance(ST[i].replace(/<[^>]+>/g,''));u.lang='en-US';u.rate=.85;u.onend=()=>{b.textContent='🔊 Dengarkan'};b.textContent='⏹ Berhenti';ss.speak(u)}
+document.addEventListener('click',e=>{const b=e.target.closest('.sp');if(b)speak(+b.dataset.s,b);else if(e.target.closest('#nb')&&window.speechSynthesis)speechSynthesis.cancel()});
+const SKY=`<g class="cl"><ellipse cx="30" cy="22" rx="22" ry="8" fill="#fff" opacity=".9"/><ellipse cx="46" cy="17" rx="14" ry="7" fill="#fff" opacity=".9"/></g><g class="cl b"><ellipse cx="120" cy="34" rx="18" ry="6" fill="#fff" opacity=".8"/><ellipse cx="132" cy="30" rx="11" ry="5" fill="#fff" opacity=".8"/></g><g transform="translate(0,12)"><path class="bd" d="M0 0q5-6 10 0q5-6 10 0" stroke="#3b2f3a" stroke-width="2" fill="none" stroke-linecap="round"/></g>`;
+const V=(a,l,k)=>`<svg viewBox="0 0 240 110" role="img" aria-label="${l}"><rect width="240" height="110" fill="#cfe6fa"/>${k?SKY:''}${a}</svg>`;
+const IMG={
+sawah:V(`<circle class="sun" cx="200" cy="24" r="14" fill="#ffd166"/><path d="M0 70Q60 50 120 68T240 62V110H0Z" fill="#8fd19e"/><path d="M0 85Q80 70 240 84V110H0Z" fill="#5fb77a"/><g class="rice" stroke="#3d9a63" stroke-width="3" stroke-linecap="round"><path d="M20 94v-8M34 96v-8M48 94v-8M62 96v-8M76 94v-8M90 96v-8M104 94v-8"/></g><path d="M150 70l18-14 18 14z" fill="#d81b60"/><rect x="156" y="70" width="24" height="14" fill="#ffe4b5"/><path class="wy" d="M0 102Q60 94 120 102T240 100" stroke="#7fb7e6" stroke-width="5" fill="none"/>`,'Sawah di Paguat',1),
+sungai:V(`<circle class="sun" cx="40" cy="24" r="13" fill="#ffd166"/><path d="M0 64L55 32 110 60 170 26 240 62V70H0Z" fill="#8fd19e"/><rect y="64" width="240" height="46" fill="#7fb7e6"/><path class="wave" d="M0 80Q30 74 60 80T120 80T180 80T240 80" stroke="#fff" stroke-width="2" fill="none"/><g class="swim"><ellipse cx="90" cy="96" rx="13" ry="6" fill="#f6b3cb"/><path d="M103 96l9-6v12z" fill="#f6b3cb"/></g><g class="swim b"><ellipse cx="170" cy="92" rx="10" ry="5" fill="#ffd166"/><path d="M180 92l8-5v10z" fill="#ffd166"/></g>`,'Sungai dan ikan',1),
+mangrove:V(`<circle class="sun" cx="200" cy="22" r="13" fill="#ffd166"/><rect y="74" width="240" height="36" fill="#7fb7e6"/>${[50,110,170].map(x=>`<path d="M${x} 50v26M${x-12} 80l12-16 12 16" stroke="#8a5a3b" stroke-width="4" fill="none" stroke-linecap="round"/><circle class="sway" cx="${x}" cy="40" r="20" fill="#5fb77a"/>`).join('')}<ellipse class="crab" cx="140" cy="96" rx="8" ry="5" fill="#f26b6b"/>`,'Hutan mangrove di pesisir',1),
+nelayan:V(`<circle class="sun" cx="196" cy="24" r="13" fill="#ffd166"/><rect y="66" width="240" height="44" fill="#7fb7e6"/><path class="wave" d="M0 80Q30 74 60 80T120 80T180 80T240 80" stroke="#fff" stroke-width="2" fill="none"/><g class="sail"><g class="bob"><path d="M60 70h90l-14 18H74z" fill="#d81b60"/><path d="M108 66V26l30 40z" fill="#fff"/><circle cx="90" cy="58" r="6" fill="#ffe4b5"/><path d="M90 64v6" stroke="#d81b60" stroke-width="5"/></g></g><ellipse class="jump" cx="190" cy="96" rx="11" ry="5" fill="#f6b3cb"/>`,'Nelayan di Teluk Tomini',1),
+hills:V(`<ellipse class="drift" cx="60" cy="22" rx="26" ry="10" fill="#fff"/><path class="rain" d="M52 34l-3 8M66 34l-3 8" stroke="#7fb7e6" stroke-width="3" stroke-linecap="round"/><path d="M0 70Q60 24 130 62T240 54V110H0Z" fill="#8fd19e"/>${[40,90,150,200].map(x=>`<rect x="${x-2}" y="58" width="4" height="10" fill="#8a5a3b"/><circle class="sway" cx="${x}" cy="52" r="10" fill="#3d9a63"/>`).join('')}<path class="wy" d="M0 98Q60 88 120 98T240 96V110H0Z" fill="#7fb7e6"/>`,'Menanam pohon di bukit'),
+maleo:V(`<circle cx="30" cy="40" r="24" fill="#8fd19e"/><circle cx="210" cy="36" r="20" fill="#8fd19e"/><path d="M0 84Q120 70 240 84V110H0Z" fill="#ffe4b5"/><g class="peck"><ellipse cx="110" cy="66" rx="30" ry="18" fill="#3b2f3a"/><ellipse cx="108" cy="72" rx="20" ry="11" fill="#f6b3cb"/><circle cx="136" cy="50" r="10" fill="#3b2f3a"/><rect x="128" y="36" width="9" height="9" rx="3" fill="#3b2f3a"/><path d="M142 48l12 3-12 4z" fill="#ff9f43"/><path d="M104 84v8M118 84v8" stroke="#ff9f43" stroke-width="3"/></g><ellipse class="egg" cx="192" cy="94" rx="9" ry="12" fill="#fff"/>`,'Burung maleo',1),
+buku:V(`<rect x="24" y="88" width="192" height="10" rx="4" fill="#d81b60"/><rect x="38" y="62" width="72" height="14" rx="2" fill="#7fb7e6"/><rect x="44" y="76" width="64" height="12" rx="2" fill="#f6b3cb"/><g class="float"><path d="M130 86Q155 72 180 86V52Q155 38 130 52Z" fill="#fff" stroke="#d81b60" stroke-width="3"/><path d="M155 44v38" stroke="#d81b60" stroke-width="2"/></g><path class="tw" d="M200 18l4 9 10 1-8 6 3 10-9-6-9 6 3-10-8-6 10-1z" fill="#ffd166"/>`,'Buku dan membaca'),
+kebun:V(`<circle class="sun" cx="204" cy="24" r="13" fill="#ffd166"/><path d="M0 74h240v36H0z" fill="#c98f5a"/>${[30,70,110,150,190].map(x=>`<g class="grow"><path d="M${x} 94V74" stroke="#3d9a63" stroke-width="4"/><circle cx="${x-7}" cy="74" r="7" fill="#5fb77a"/><circle cx="${x+7}" cy="74" r="7" fill="#5fb77a"/><circle cx="${x}" cy="88" r="4" fill="#e74c3c"/></g>`).join('')}`,'Kebun sekolah',1),
+chat:V(`<rect x="80" y="8" width="80" height="96" rx="12" fill="#fff" stroke="#d81b60" stroke-width="4"/><rect class="bub" x="90" y="26" width="54" height="16" rx="8" fill="#f6b3cb"/><rect class="bub b" x="100" y="48" width="52" height="16" rx="8" fill="#cfe6fa"/><g class="pop"><circle cx="196" cy="56" r="20" fill="#5fb77a"/><path d="M186 56l8 8 14-16" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round"/></g><g class="scan"><circle cx="44" cy="50" r="14" fill="none" stroke="#d81b60" stroke-width="5"/><path d="M54 60l14 14" stroke="#d81b60" stroke-width="5" stroke-linecap="round"/></g>`,'Memeriksa pesan sebelum dibagikan'),
+radio:V(`<rect x="60" y="40" width="120" height="58" rx="12" fill="#f6b3cb" stroke="#d81b60" stroke-width="4"/><circle cx="96" cy="69" r="16" fill="#fff"/><path d="M130 58h36M130 70h36M130 82h36" stroke="#d81b60" stroke-width="4" stroke-linecap="round"/><path d="M150 40L190 10" stroke="#d81b60" stroke-width="3"/><path class="wv" d="M200 24q10 6 0 14M210 18q16 12 0 26" stroke="#7fb7e6" stroke-width="3" fill="none" stroke-linecap="round"/>`,'Radio'),
+megaphone:V(`<path d="M60 48l70-26v66L60 64z" fill="#d81b60"/><rect x="40" y="46" width="24" height="20" rx="4" fill="#f6b3cb"/><path class="wv" d="M146 40q16 15 0 30M158 30q26 25 0 50" stroke="#7fb7e6" stroke-width="4" fill="none" stroke-linecap="round"/>`,'Pengumuman'),
+poster:V(`<rect x="70" y="8" width="100" height="94" rx="8" fill="#fff" stroke="#d81b60" stroke-width="4"/><rect x="82" y="16" width="76" height="10" rx="4" fill="#f6b3cb"/><rect x="82" y="32" width="76" height="34" fill="#cfe6fa"/><path class="wy" d="M82 58q19-10 38 0t38 0v8H82z" fill="#7fb7e6"/><rect class="float" x="132" y="42" width="12" height="16" rx="2" fill="#5fb77a"/><rect x="82" y="74" width="60" height="6" rx="3" fill="#f6b3cb"/><rect x="82" y="86" width="44" height="6" rx="3" fill="#cfe6fa"/><rect x="22" y="62" width="28" height="36" rx="4" fill="#5fb77a"/>`,'Poster kebersihan sungai'),
+dialog:V(`<rect class="bub" x="20" y="14" width="110" height="38" rx="16" fill="#fff" stroke="#d81b60" stroke-width="3"/><g class="dots" fill="#d81b60"><circle cx="50" cy="33" r="4"/><circle cx="68" cy="33" r="4"/><circle cx="86" cy="33" r="4"/></g><rect class="bub b" x="110" y="58" width="110" height="38" rx="16" fill="#e3f1fc" stroke="#7fb7e6" stroke-width="3"/><g class="dots" fill="#7fb7e6"><circle cx="140" cy="77" r="4"/><circle cx="158" cy="77" r="4"/><circle cx="176" cy="77" r="4"/></g>`,'Percakapan')};
+const pic=k=>k?`<div class="pic">${IMG[k]}</div>`:'';
+const MG=['radio','sawah','megaphone','sungai','poster','dialog','sawah'],SG=['sawah','megaphone','radio','poster','maleo','dialog','kebun','radio','mangrove'];
+// ===== Mesin soal =====
+function Q(host,q,mode,done){let lk=false;
+host.innerHTML=(q.s!=null?pic(SG[q.s])+`<div class="stim">${ST[q.s]}<br><button class="alt sp" data-s="${q.s}">🔊 Dengarkan</button></div>`:'')+`<p class="q">${q.q}</p><div class="ans"></div><div class="fb"></div>`;
+const ans=host.querySelector('.ans'),fb=host.querySelector('.fb');
+function sm(ok){if(mode!='test')setTimeout(()=>{if(ok){snd(660,.12,'triangle',.12);setTimeout(()=>snd(990,.16,'sine',.1),100)}else{snd(190,.22,'sawtooth',.12)}},130);if(mode=='learn'&&!ok){fb.className='fb bad';fb.textContent='Belum tepat. Baca materinya lagi lalu coba lagi 💪';return 0}
+lk=1;ans.classList.add('lock');if(mode=='test'){fb.className='fb good';fb.textContent='Jawaban tersimpan ✔'}else{fb.className='fb '+(ok?'good':'bad');fb.innerHTML=(ok?'✅ Benar! ':'❌ Kurang tepat. ')+q.e}done(ok);return 1}
+if(q.t=='mcq')q.o.forEach((o,i)=>{const b=document.createElement('button');b.className='opt';b.textContent='ABC'[i]+'. '+o;b.onclick=()=>{if(lk)return;const ok=i==q.a;if(sm(ok)&&mode!='test')b.classList.add(ok?'ok':'no');else if(mode=='test')b.classList.add('sel')};ans.append(b)});
+if(q.t=='multi'){const bs=q.o.map((o,i)=>{const b=document.createElement('button');b.className='opt';b.textContent='☐ '+o;b.onclick=()=>{b.classList.toggle('sel');b.textContent=(b.classList.contains('sel')?'☑ ':'☐ ')+o};ans.append(b);return b});
+const c=document.createElement('button');c.textContent='Periksa';c.onclick=()=>{if(lk)return;const s=bs.map((b,i)=>b.classList.contains('sel')?i:-1).filter(i=>i>=0);sm(s.join()==q.a.join())};ans.append(c)}
+if(q.t=='place'){ans.innerHTML=`<div class="zs">${q.z.map(z=>`<div class="zone"><b>${z}</b><div class="slot"></div></div>`).join('')}</div><div class="pool"></div>`;
+const pool=ans.querySelector('.pool'),zs=[...ans.querySelectorAll('.slot')];let sel=null,dr=null;
+const put=(c,t)=>{if(t.classList.contains('slot')&&t.firstChild&&t.firstChild!==c)pool.append(t.firstChild);t.append(c);if(sel)sel.classList.remove('sel');sel=null};
+sh(q.c.map((c,i)=>[c,i])).forEach(([c,i])=>{const e=document.createElement('div');e.className='chip';e.textContent=c;e.dataset.i=i;e.draggable=true;
+e.onclick=ev=>{ev.stopPropagation();if(lk)return;if(sel&&sel!==e&&e.parentNode.classList.contains('slot')){put(sel,e.parentNode);return}if(sel)sel.classList.remove('sel');sel=sel===e?null:e;if(sel)sel.classList.add('sel')};
+e.ondragstart=()=>{dr=e};pool.append(e)});
+[...zs,pool].forEach(t=>{t.onclick=()=>{if(sel&&!lk)put(sel,t)};t.ondragover=ev=>ev.preventDefault();t.ondrop=ev=>{ev.preventDefault();if(dr&&!lk)put(dr,t)}});
+const c=document.createElement('button');c.textContent='Periksa';c.onclick=()=>{if(lk)return;if(zs.some(s=>!s.firstChild)){fb.className='fb bad';fb.textContent='Isi semua kotak dulu ya.';return}sm(zs.every((s,i)=>+s.firstChild.dataset.i===q.a[i]))};host.querySelector('.ans').after(c)}}
+const key=q=>q.t=='mcq'?q.o[q.a]:q.t=='multi'?q.a.map(i=>q.o[i]).join('; '):q.t=='place'?q.z.map((z,i)=>z+' → '+q.c[q.a[i]]).join('; '):'';
+// ===== Materi =====
+const M=[
+{t:'Apa itu Teks Lisan?',x:'Teks lisan adalah pesan yang disampaikan dan diterima lewat suara: percakapan, pengumuman, berita radio, dan pidato. Saat menyimak, telingamu bekerja lebih dulu. Contoh: <i>“Good morning, students. Today we clean the school yard.”</i>',l:'Pengumuman di masjid dan siaran Radio Pohuwato membantu warga Paguat tahu kabar penting, seperti cuaca dan jadwal gotong royong.',c:'Menyimak dengan tenang adalah cara menghargai orang yang berbicara.',a:0,r:'Ilmu bertambah ketika kita mau mendengar dan terus memohon tambahan ilmu kepada Allah.',q:{t:'mcq',q:'Which one is a spoken text?',o:['A radio announcement','A printed poster only','A silent drawing'],a:0,e:'Pengumuman radio disampaikan lewat suara.'}},
+{t:'Apa itu Ide Pokok?',x:'Ide pokok (<i>main idea</i>) adalah gagasan terpenting yang dibicarakan sebuah teks. Kalimat lain hanya menjelaskan atau mendukungnya; itu disebut detail pendukung (<i>supporting details</i>). Bayangkan pohon: batangnya ide pokok, daunnya detail.',l:'Cerita petani di Paguat: Pak Rahman mengajak anaknya menjaga air sawah. Ide pokoknya adalah menghemat air.',c:'Menjaga air berarti menyayangi lingkungan dan sesama makhluk.',a:1,r:'Memahami pesan lalu menjawab dengan kata yang baik adalah akhlak terhadap sesama.',q:{t:'mcq',q:'The main idea is…',o:['the most important idea of a text','the longest word','the title of the book only'],a:0,e:'Ide pokok adalah gagasan terpenting.'}},
+{t:'Cara Menemukan Ide Pokok Saat Menyimak',x:'Tiga langkah: (1) dengarkan kalimat pembuka dan penutup, (2) catat kata yang diulang, (3) tanyakan <i>What is the text mostly about?</i> Pertanyaan Who, What, Where, When, Why juga membantu.',l:'Saat nenek di Paguat bercerita tentang panen padi, kata yang sering diulang menunjukkan hal terpenting.',c:'Bertanya dengan sopan membuat pembicara merasa dihargai.',a:0,r:'Bertanya untuk menambah ilmu sejalan dengan doa memohon tambahan ilmu.',q:{t:'mcq',q:'Which question helps you find the main idea?',o:['What is the text mostly about?','What colour is the speaker’s bag?','How many chairs are there?'],a:0,e:'Pertanyaan itu mengarah ke topik utama.'}},
+{t:'Detail Pendukung',x:'Detail menjawab pertanyaan tentang ide pokok: siapa, apa, di mana, berapa banyak. Contoh ide pokok: <i>The river is important for our village.</i> Detailnya: air untuk sawah dan ikan sebagai makanan.',l:'Sungai di wilayah pedalaman Paguat memberi air bagi sawah dan ikan bagi keluarga.',c:'Bersyukur atas alam dan berbagi hasilnya dengan tetangga.',a:1,r:'Berbagi dengan kata dan perbuatan baik adalah wujud bertutur baik kepada manusia.',q:{t:'place',q:'Susun ke kotak yang tepat (seret, atau ketuk kartu lalu kotak).',z:['Main idea','Detail: rice fields','Detail: food'],c:['The river is important for our village','It gives water to the rice fields','Fish live in it for our food'],a:[0,1,2],e:'Ide pokok bersifat umum; detail menjelaskannya.'}},
+{t:'Teks Multimodal',x:'Teks multimodal memadukan beberapa cara menyampaikan pesan: kata, gambar, suara, dan gerak. Poster, video, dan siaran bergambar adalah contohnya. Ide pokok muncul dari gabungan judul, gambar, dan keterangan.',l:'Poster “Keep Our River Clean” di madrasah memakai gambar anak membuang sampah ke tempatnya dan tulisan ajakan.',c:'Mencintai tanah air dimulai dari menjaga kebersihan sungai dan desa.',a:0,r:'Ilmu dari berbagai sumber, dengar, lihat, dan baca, menambah pemahaman kita.',q:{t:'mcq',q:'A multimodal text can use…',o:['words, pictures, and sound','only words','only numbers'],a:0,e:'Multimodal berarti memakai banyak mode.'}},
+{t:'Berkomunikasi Efektif dan Sopan',x:'Komunikasi efektif berarti pesanmu dipahami. Gunakan kata sopan: <i>Excuse me, Please, Thank you, You are welcome</i>. Tatap pembicara, jangan memotong, dan jawab dengan jelas.',l:'Menyapa guru dan tetangga di Paguat dengan salam dan senyum adalah kebiasaan baik kita.',c:'Moderasi beragama: menghormati teman yang berbeda pendapat.',a:1,r:'Allah memerintahkan kita berkata baik kepada semua orang.',q:{t:'mcq',q:'Which is polite when you want to ask?',o:['Excuse me, may I ask?','Hey, tell me!','Quick!'],a:0,e:'“Excuse me, may I ask?” sopan.'}},
+{t:'Merangkum Ide Pokok',x:'Rumus sederhana: topik + hal terpenting yang dikatakan tentang topik itu. Contoh: <i>Villagers in Paguat helped each other after the rain.</i> Kalimat ide pokok yang baik pendek, jelas, dan mencakup seluruh teks.',l:'Gunakan peristiwa nyata di sekitarmu, seperti gotong royong di desa, untuk berlatih merangkum.',c:'Cintai dirimu dengan terus belajar, dan cintai sesama dengan membantu.',a:0,r:'Mencari ilmu adalah bentuk cinta kepada Allah dan diri sendiri.',q:{t:'mcq',q:'A good main idea sentence is…',o:['short and covers the whole text','about one small detail only','not related to the text'],a:0,e:'Ide pokok mencakup keseluruhan teks.'}}];
+let li=0;
+function startLearn(){li=0;go('learn');rl()}
+function rdm(m,b){const ss=window.speechSynthesis;if(!ss){b.textContent='Suara tidak didukung';return}
+if(ss.speaking){ss.cancel();b.textContent='🔊 Bacakan Materi';return}
+const t=`${m.t}. ${m.x} Konteks Paguat: ${m.l} Nilai cinta: ${m.c} Korelasi: ${m.r}`;
+const seg=t.split(/(<i>.*?<\/i>)/g).filter(x=>x.replace(/<[^>]+>/g,'').trim());
+b.textContent='⏹ Berhenti';
+seg.forEach((x,i)=>{const u=new SpeechSynthesisUtterance(x.replace(/<[^>]+>/g,''));u.lang=x.startsWith('<i>')?'en-US':'id-ID';u.rate=.9;if(i==seg.length-1)u.onend=()=>{b.textContent='🔊 Bacakan Materi'};ss.speak(u)})}
+function rl(){if(window.speechSynthesis)speechSynthesis.cancel();const m=M[li];$('#lb').innerHTML=`<small>Slide ${li+1} dari ${M.length} ${S.ld.map((v,i)=>v?'●':'○').join('')}</small><h2>${m.t}</h2>${pic(MG[li])}<button class="alt" id="rd">🔊 Bacakan Materi</button><p>${m.x}</p><div class="box loc">📍 <b>Konteks Paguat:</b> ${m.l}</div><div class="box kbc">💗 <b>Nilai Cinta:</b> ${m.c}</div>${ay(m.a)}<p><small><b>Korelasi:</b> ${m.r}</small></p><h3>Tantangan</h3><div id="act"></div><div class="nav"><button class="alt" id="lp">Kembali</button><button id="ln">${li==M.length-1?'Selesai & Buka Menu Bermain':'Selanjutnya (Next)'}</button></div>`;
+const nx=$('#ln');nx.disabled=!S.ld[li];$('#rd').onclick=()=>rdm(m,$('#rd'));$('#lp').onclick=()=>{if(li)li--;else menu();rl_()};
+Q($('#act'),m.q,'learn',()=>{S.ld[li]=1;nx.disabled=false});
+nx.onclick=()=>{if(li<M.length-1){li++;rl()}else if(M.every((x,i)=>S.ld[i])){S.learn=1;mod('<h2>Hebat! 🎉</h2><p>Menu <b>Bermain</b> sudah terbuka.</p>');menu()}}}
+function rl_(){rl()}
+// ===== Stimulus =====
+const ST=['Pak Rahman is a farmer in Paguat, Pohuwato. Every morning, he walks to the rice field near the river. Today, he tells his son, Fajar, about the water. “The river is low,” he says. “We must save water. We can close the small gate after the field is full. Water is a gift from Allah.” Fajar listens carefully and says, “I will help you, Father.” Then they close the gate together and thank Allah for the water.',
+'Good morning, students of MIS Al-Khairaat Paguat. This is an announcement. On Friday, we will clean the school yard and plant ten mango trees. Please bring a small shovel and a bottle of water. We start at seven o’clock and finish at nine o’clock. Trees give us fresh air and shade. Let us love our environment together. Thank you.',
+'Welcome to Radio Pohuwato. Today in Paguat, it is rainy in the morning and cloudy in the afternoon. The river may rise, so children must stay away from the water. Mr Hasan sells fish at Paguat market. He sells 3 baskets every day. After 4 days, he sells 12 baskets. Please be careful and take care of your family.',
+'POSTER. Title: Keep Our River Clean. Picture: a boy puts a plastic bottle in a bin beside a clear river. Text: Do not throw rubbish into the river. A plastic bottle needs hundreds of years to break down. Caption: A clean river, a happy village. Slogan: Love our river, love our life.',
+'The maleo is a special bird from Sulawesi. You can find it in Panua Nature Reserve, Pohuwato. The mother bird does not sit on her eggs. She buries them in warm sand. After about 60 days, the chicks come out and can fly by themselves. We must protect the maleo because it is almost extinct. Allah created every animal with care, so we must love them.',
+'Aisyah: Excuse me, Mr Hasan. May I ask a question? Mr Hasan: Of course, Aisyah. Aisyah: Where is the school library, please? Mr Hasan: It is next to the mosque. Aisyah: Thank you very much, Mr Hasan. Mr Hasan: You are welcome. Aisyah: Assalamualaikum. Mr Hasan: Waalaikumsalam.',
+'Class IV students of MIS Al-Khairaat Paguat plant vegetables in the school garden every Friday. They say Bismillah, water the plants, and share the harvest with neighbours. Table: chili = 12 plants; tomato = 8 plants; eggplant = 5 plants.',
+'Radio Pohuwato news: After the heavy rain, many villagers in Paguat helped their neighbours. Some cleaned mud from the road. Some brought rice and clean water to families whose houses were wet. A boy, Ilham, shared his lunch with a younger child. The village head said, “Helping each other makes us strong.” Let us show love to all people.',
+'Mangrove forests grow along the coast of Pohuwato. Their roots hold the soil, so waves cannot take the land away. Small fish and crabs live between the roots, and fishermen can catch them for their families. If we cut too many trees, the coast will be damaged. Allah has given us nature as a trust (amanah), and we must care for it.'];
+// ===== Bermain =====
+const PL=[
+{s:0,t:'place',q:'Menjodohkan: pasangkan pertanyaan dengan jawabannya.',z:['Who?','Where?','What must we do?'],c:['Pak Rahman, a farmer','At the rice field near the river','Save water'],a:[0,1,2],e:'Jawaban ada di kalimat awal dan tengah teks.'},
+{s:0,t:'mcq',q:'What is the main idea?',o:['Fajar likes walking in the morning.','We must save water because it is a gift from Allah.','The river is very big.'],a:1,e:'Pesan utama: menghemat air.'},
+{s:1,t:'place',q:'Mengurutkan: susun isi pengumuman dari awal sampai akhir.',z:['1','2','3'],c:['Greeting and opening','Event: clean the yard, plant 10 mango trees','What to bring and the time'],a:[0,1,2],e:'Urutan: sapaan, acara, perlengkapan dan waktu.'},
+{s:1,t:'multi',q:'Pilih SEMUA detail pendukung.',o:['Bring a small shovel and a bottle of water','Students start at seven o’clock','Mangoes are sold in the market','Trees give fresh air and shade'],a:[0,1,3],e:'Detail pendukung ada di teks; mangga dijual di pasar tidak disebut.'},
+{s:1,t:'mcq',q:'Numerasi: how many hours do the students work (7 to 9 o’clock)?',o:['1 hour','2 hours','3 hours'],a:1,e:'9 − 7 = 2 jam.'},
+{s:2,t:'place',q:'Drag & Drop: letakkan kartu di kotak yang tepat.',z:['Main idea','Detail: weather','Detail: numbers'],c:['Be careful because the river may rise','It is rainy in the morning','Mr Hasan sells 12 baskets in 4 days'],a:[0,1,2],e:'Ide pokok adalah peringatan tentang sungai.'},
+{s:2,t:'mcq',q:'Numerasi: at 3 baskets a day, how many baskets in 5 days?',o:['12','15','8'],a:1,e:'3 × 5 = 15.'},
+{s:3,t:'multi',q:'Pilih SEMUA yang mendukung ide pokok poster.',o:['The picture shows a boy using a bin','The title says Keep Our River Clean','The poster sells plastic bottles','The text says do not throw rubbish'],a:[0,1,3],e:'Gambar, judul, dan teks sama-sama mendukung kebersihan sungai.'},
+{s:3,t:'place',q:'Menjodohkan: pasangkan bagian poster dengan fungsinya.',z:['Picture','Text','Caption'],c:['Shows a boy using a bin','Tells us not to throw rubbish','Gives the short message'],a:[0,1,2],e:'Setiap mode punya fungsi sendiri.'},
+{s:0,t:'place',q:'Mengurutkan: susun peristiwa cerita.',z:['1','2','3'],c:['Pak Rahman walks to the rice field','He tells Fajar to save water','They close the gate together'],a:[0,1,2],e:'Ikuti urutan waktu dalam cerita.'}];
+let pi=0;
+function startPlay(){
+ go('play');
+ $('#pb').innerHTML=`<div class="c"><h2>🎮 Pilih Permainan</h2><p>Pilih tantangan yang kamu sukai!</p>
+ <div class="menus">
+ <div class="mc" onclick="startPicturePlay()"><div class="ic">🕵️‍♀️</div><h3>Tebak Gambar</h3><p>Amati gambar dan temukan ide pokok serta informasi penting.</p></div>
+ <div class="mc" onclick="startCrossword()"><div class="ic">🧩</div><h3>Teka-Teki Silang</h3><p>Latih kosakata penting tentang ide pokok, teks lisan, dan teks multimodal.</p></div>
+ </div><p><button class="alt" onclick="menu()">Kembali ke Menu Utama</button></p></div>`;
+}
+function startPicturePlay(){pi=0;S.pok=0;S.playRes=[];rpl()}
+function rpl(){
+ if(pi>=PL.length){S.play=1;const a=Math.round((S.pok/PL.length)*100);$('#pb').innerHTML=`<div class="c"><h2>Rekap Tebak Gambar 🎮</h2><p>Skor: <b>${a}</b> / 100 · Akurasi: <b>${a}%</b></p><p>Menu <b>Berlatih</b> sudah terbuka!</p><button onclick="menu()">Ke Menu Utama</button></div>`;return}
+ const q=PL[pi], imageKey=SG[q.s]||'sawah';
+ $('#pb').innerHTML=`<small>Tebak Gambar ${pi+1} dari ${PL.length}</small><h2>🔎 Amati gambar, lalu pilih jawaban!</h2>
+ <div class="box loc">Perhatikan ilustrasi berikut. Dengarkan atau baca teks petunjuk, lalu tebak gagasan utama atau informasi yang sesuai.</div>
+ ${pic(imageKey)}<div id="pq"></div><div id="pn"></div>`;
+ Q($('#pq'),q,'play',ok=>{if(ok)S.pok++;S.playRes[pi]=ok;$('#pn').innerHTML='<button id="nb">'+(pi===PL.length-1?'Lihat Rekap':'Gambar Berikutnya ➜')+'</button>';$('#nb').onclick=()=>{snd(520,.1,'triangle',.08);pi++;rpl()}})
+}
+
+// ===== Teka-Teki Silang =====
+const CW=[
+ {w:'MAINIDEA',r:0,c:5,d:'H',clue:'Istilah bahasa Inggris untuk gagasan utama yang merangkum isi teks.'},
+ {w:'MANGROVE',r:0,c:5,d:'V',clue:'Jenis hutan pesisir yang akarnya membantu melindungi pantai dari abrasi.'},
+ {w:'GARDEN',r:7,c:1,d:'H',clue:'Tempat kelas IV menanam sayuran sebelum berbagi hasil panen.'},
+ {w:'POSTER',r:5,c:4,d:'H',clue:'Jenis teks visual yang memadukan judul, gambar, dan tulisan ajakan.'},
+ {w:'RADIO',r:7,c:3,d:'V',clue:'Media audio yang menyampaikan pengumuman atau berita melalui suara.'},
+ {w:'RIVER',r:10,c:2,d:'H',clue:'Kata bahasa Inggris untuk sungai, sumber air yang dibahas Pak Rahman.'},
+ {w:'MALEO',r:2,c:8,d:'V',clue:'Nama burung khas Sulawesi yang perlu dilindungi karena merupakan satwa unik daerah ini.'},
+ {w:'WATER',r:3,c:7,d:'H',clue:'Kata bahasa Inggris untuk air, yang perlu dihemat saat mengairi sawah.'},
+ {w:'LISTEN',r:2,c:0,d:'H',clue:'Kata kerja bahasa Inggris yang berarti menyimak suara dengan saksama.'}
+];
+function startCrossword(){
+ const rows=12,cols=13,offset=0;
+ const cells={},nums={},starts=[];
+ CW.forEach((w,i)=>{starts.push(w);for(let j=0;j<w.w.length;j++){const r=w.r+(w.d==='V'?j:0),c=w.c+(w.d==='H'?j:0),k=r+','+c;cells[k]=w.w[j];}});
+ let num=0;
+ for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+   const k=r+','+c;if(!(k in cells))continue;
+   const across=CW.some(w=>w.d==='H'&&w.r===r&&w.c===c),down=CW.some(w=>w.d==='V'&&w.r===r&&w.c===c);
+   if(across||down)nums[k]=++num;
+ }
+ const numberOf=w=>nums[w.r+','+w.c];
+ let html=`<div class="c"><h2>🧩 Teka-Teki Silang</h2><p>Lengkapi kotak berdasarkan petunjuk mendatar dan menurun. Gunakan huruf A–Z.</p>
+ <div class="badge">9 kata rahasia</div><div class="cross-wrap"><div class="cross-grid" style="grid-template-columns:repeat(${cols},clamp(25px,5.3vw,38px))">`;
+ for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+   const k=r+','+c;
+   if(!(k in cells)){html+='<div class="cross-cell block"></div>';continue}
+   const clueNum=nums[k]||'';
+   html+=`<div class="cross-cell">${clueNum?`<span class="cross-num">${clueNum}</span>`:''}<input aria-label="Baris ${r+1} kolom ${c+1}" maxlength="1" data-cell="${k}" autocomplete="off"></div>`;
+ }
+ html+=`</div></div><div class="cross-clues"><section><h3>➡️ Mendatar</h3>`;
+ CW.filter(w=>w.d==='H').forEach(w=>{html+=`<label><b>${numberOf(w)}.</b> ${w.clue}</label>`});
+ html+=`</section><section><h3>⬇️ Menurun</h3>`;
+ CW.filter(w=>w.d==='V').forEach(w=>{html+=`<label><b>${numberOf(w)}.</b> ${w.clue}</label>`});
+ html+=`</section></div><div class="fb" id="cwfb" aria-live="polite"></div>
+ <button onclick="checkCrossword()">Periksa Jawaban</button><button class="alt" onclick="showCrosswordAnswers()">Lihat Petunjuk Huruf</button><button class="alt" onclick="startPlay()">Pilih Game Lain</button><button class="alt" onclick="menu()">Menu Utama</button></div>`;
+ $('#pb').innerHTML=html;
+ const inputs=[...document.querySelectorAll('.cross-cell input')];
+ inputs.forEach((inp,i)=>inp.addEventListener('input',()=>{inp.value=inp.value.replace(/[^a-z]/ig,'').toUpperCase().slice(0,1);if(inp.value&&inputs[i+1])inputs[i+1].focus()}));
+}
+function checkCrossword(){
+ let correct=0,total=0;
+ const cellMap={};CW.forEach(w=>{for(let j=0;j<w.w.length;j++){const r=w.r+(w.d==='V'?j:0),c=w.c+(w.d==='H'?j:0);cellMap[r+','+c]=w.w[j]}});
+ document.querySelectorAll('.cross-cell input').forEach(inp=>{total++;const ok=(inp.value||'').toUpperCase()===cellMap[inp.dataset.cell];inp.classList.toggle('good',ok);inp.classList.toggle('bad',!ok);if(ok)correct++});
+ const fb=$('#cwfb');
+ if(correct===total){fb.className='fb good';fb.textContent='🎉 Hebat! Semua huruf benar. Kamu menyelesaikan Teka-Teki Silang!';snd(660,.12,'triangle',.12);setTimeout(()=>snd(990,.18,'sine',.1),130);S.play=1;fb.insertAdjacentHTML('afterend','<p><b>Skor: 100/100</b> 🏆</p><button onclick="menu()">Selesai & Kembali ke Menu</button>')}
+ else{fb.className='fb bad';fb.textContent=`Kamu benar ${correct} dari ${total} kotak. Kotak hijau benar, kotak merah perlu diperbaiki. Ayo coba lagi!`;snd(190,.18,'sawtooth',.1)}
+}
+function showCrosswordAnswers(){
+ const cellMap={};CW.forEach(w=>{for(let j=0;j<w.w.length;j++){const r=w.r+(w.d==='V'?j:0),c=w.c+(w.d==='H'?j:0);cellMap[r+','+c]=w.w[j]}});
+ document.querySelectorAll('.cross-cell input').forEach(inp=>{inp.value=cellMap[inp.dataset.cell];inp.classList.remove('bad');inp.classList.add('good')});
+ $('#cwfb').className='fb good';$('#cwfb').textContent='Petunjuk huruf ditampilkan. Tekan Periksa Jawaban untuk menyelesaikan.';
+}
+
+// ===== Berlatih =====
+const TS=[
+{l:1,p:8,s:4,t:'mcq',q:'What is the main idea?',o:['The maleo is a special bird that we must protect.','Maleo birds eat sand.','Sulawesi has many rivers.'],a:0,e:'Teks menekankan kekhasan dan perlindungan maleo.'},
+{l:1,p:8,s:4,t:'mcq',q:'Where can we find the maleo in Pohuwato?',o:['In Panua Nature Reserve','At the school yard','In the market'],a:0,e:'Tertulis pada kalimat kedua.'},
+{l:1,p:8,s:5,t:'mcq',q:'Which words show politeness?',o:['Excuse me, please','Go away','Quickly'],a:0,e:'“Excuse me” dan “please” adalah ungkapan sopan.'},
+{l:2,p:10,s:5,t:'mcq',q:'What is the main idea of the dialogue?',o:['Aisyah politely asks where the library is.','Aisyah buys a book.','Mr Hasan teaches English.'],a:0,e:'Inti percakapan: bertanya lokasi perpustakaan dengan sopan.'},
+{l:2,p:10,s:6,t:'mcq',q:'Numerasi: how many plants are in the table in total?',o:['20','25','30'],a:1,e:'12 + 8 + 5 = 25.'},
+{l:2,p:10,s:6,t:'mcq',q:'What is the main idea?',o:['Class IV plants and shares vegetables from the school garden.','Eggplant is the best vegetable.','Neighbours sell tomatoes.'],a:0,e:'Kegiatan menanam dan berbagi adalah gagasan utama.'},
+{l:2,p:10,s:7,t:'multi',q:'Choose ALL supporting details.',o:['Some villagers cleaned mud from the road','Ilham shared his lunch','The rain stopped the radio','Families received rice and clean water'],a:[0,1,3],e:'Tiga pilihan itu ada di teks.'},
+{l:3,p:12,s:7,t:'mcq',q:'Why does the village head say “Helping each other makes us strong”?',o:['Because working together helps the village face problems','Because strong people do not need help','Because the road is long'],a:0,e:'Pernyataan itu merangkum pesan gotong royong.'},
+{l:3,p:12,s:8,t:'multi',q:'Choose ALL true statements.',o:['Mangrove roots help protect the coast','Fish and crabs live between the roots','Cutting trees makes the coast stronger','Nature is a trust that we must care for'],a:[0,1,3],e:'Menebang pohon justru merusak pantai.'},
+{l:3,p:12,s:8,t:'place',q:'Cause and effect: pasangkan sebab dengan akibatnya.',z:['Roots hold the soil','Small fish and crabs live in roots','Too many trees are cut'],c:['Waves cannot take the land away','Fishermen can catch food for their families','The coast will be damaged'],a:[0,1,2],e:'Hubungan sebab-akibat sesuai teks.'}];
+let ti=0;
+function startTest(){ti=0;S.test=[];go('practice');rt()}
+function rt(){if(ti>=TS.length){rep();return}const q=TS[ti];
+$('#tb').innerHTML=`<small>Soal ${ti+1} dari 10 · ${q.p} poin</small> <span class="lv l${q.l}">Level ${q.l} – ${['','Dasar','Sedang','HOTS'][q.l]}</span><div id="tq"></div><div id="tn"></div>`;
+Q($('#tq'),q,'test',ok=>{S.test[ti]={ok,l:q.l,p:q.p};$('#tn').innerHTML='<button id="nb">'+(ti==9?'Lihat Laporan':'Lanjut')+'</button>';$('#nb').onclick=()=>{ti++;rt()}})}
+
+// ===== Laporan & Pengiriman ke GAS =====
+function rep(){
+  go('report');
+  const t=S.test,pt=t.reduce((a,r)=>a+(r.ok?r.p:0),0),lv=l=>{const x=t.filter(r=>r.l==l);return Math.round(100*x.filter(r=>r.ok).length/x.length)};
+  const pr=pt>=90?'Sangat Baik':pt>=75?'Baik':pt>=60?'Cukup':'Perlu Bimbingan',L=[lv(1),lv(2),lv(3)],w=L.indexOf(Math.min(...L));
+  const rec=['Ulangi menyimak teks dan temukan topik utamanya.','Perbanyak latihan membedakan ide pokok dan detail.','Latih penalaran sebab-akibat dan kesimpulan dari teks.'][w];
+  
+  // Format Detail Jawaban untuk dikirim ke Google Sheets
+  let dtB = t.filter(x=>x.ok).length; // Benar di Berlatih
+  let dfB = TS.length - dtB;          // Salah di Berlatih
+  
+  // Tambahkan tanda petik tunggal (') di awal agar Google Sheets tidak menganggapnya sebagai formula matematika
+  let detailStr = "'--- REKAP BERMAIN ---\nSkor Tebak Gambar: " + (S.pok*10) + " / 100\n\n";
+  detailStr += "--- REKAP BERLATIH ---\n";
+  TS.forEach((q, i) => {
+      detailStr += `Soal ${i+1}: ${t[i].ok ? 'BENAR' : 'SALAH'} (Kunci: ${key(q)})\n`;
+  });
+
+  // Kirim Hasil ke GAS
+  sendDataToGAS({
+      type: "hasil",
+      nama: S.n,
+      kelas: S.k,
+      benar: dtB + S.pok,
+      salah: dfB + (PL.length - S.pok),
+      skor: pt,
+      detail: detailStr
+  });
+
+  $('#rp').innerHTML=`<div class="c"><h2>Laporan Hasil Belajar</h2><b>Media Pembelajaran Interaktif: Ide Pokok – Teks Lisan dan Multimodal</b><br>Bahasa Inggris · Kelas IV · Fase B<br><small>Pengembang: Mardawati, S.S – MIS Al-Khairaat Paguat · mardawati_2001@madrasah.kemenag.go.id</small></div><hr>
+  <p><b>Nama:</b> ${S.n} · <b>Kelas:</b> ${S.k} · <b>Tanggal:</b> ${new Date().toLocaleDateString('id-ID',{dateStyle:'long'})}</p>
+  <h3>Rekap Bermain</h3><p>Skor ${S.pok*10}/100 · Akurasi ${S.pok*10}%</p>
+  <h3>Rincian Berlatih</h3><p>Nilai akhir: <b>${pt}</b> / 100 · Predikat: <b>${pr}</b></p>
+  <table><tr><th>Level</th><th>Penguasaan</th></tr><tr><td>Level 1 – Dasar</td><td>${L[0]}%</td></tr><tr><td>Level 2 – Aplikasi</td><td>${L[1]}%</td></tr><tr><td>Level 3 – HOTS</td><td>${L[2]}%</td></tr></table>
+  <div class="box kbc">💗 <b>Catatan Kurikulum Berbasis Cinta:</b> ${S.n} belajar menyimak dengan tenang, bertutur sopan, dan menyayangi sesama serta lingkungan Paguat.</div>
+  <p><b>Rekomendasi guru:</b> ${rec}</p>
+  <h3>Kunci & Pembahasan</h3>${TS.map((q,i)=>`<p><small><b>${i+1}. ${t[i].ok?'✔':'✘'}</b> Kunci: ${key(q)}. ${q.e}</small></p>`).join('')}`;
+}
+function pdf(){if(window.html2pdf)html2pdf().set({margin:8,filename:'Laporan_'+S.n.replace(/\s+/g,'_')+'.pdf',html2canvas:{scale:2},jsPDF:{format:'a4'}}).from($('#rp')).save();else print()}
+</script></body></html>
